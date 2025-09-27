@@ -1,0 +1,18 @@
+#!/bin/bash
+# pre-push hook to detect tag pushes
+
+remote="$1"
+url="$2"
+
+echo "Remote: $remote"
+echo "URL: $url"
+# Get local tags that are about to be pushed
+local_tags=$(git tag --contains $(git rev-parse HEAD))
+echo "Local tags: $local_tags"
+exit 0
+
+if [ -n "$local_tags" ]; then
+    echo "Pushing tag(s): $local_tags"
+    exit 0
+    # Add custom logic here
+fi

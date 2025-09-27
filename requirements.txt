@@ -1,0 +1,5 @@
+openpyxl==3.1.5
+pdftotext==2.2.2
+zoozl==0.1.6
+reportlab==4.2.5
+openai-agents==0.3.0

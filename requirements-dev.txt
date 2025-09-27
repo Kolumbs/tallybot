@@ -1,0 +1,12 @@
+black
+flake8
+mypy
+pip
+setuptools
+wheel
+build
+docformatter
+# for testing
+websockets
+# for mypy
+types-openpyxl
