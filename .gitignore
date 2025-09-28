@@ -3,7 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.db
-upload.sh
+*.sh
+*.png
 
 # C extensions
 *.so

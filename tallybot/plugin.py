@@ -97,7 +97,7 @@ def make_a_run(
 class TallyBot(Interface):
     """Tallybot interface to zoozl chatbot."""
 
-    aliases = {"tallybot", "help", "greet", "cancel"}
+    aliases = {"tallybot", "help", "greet"}
 
     def load(self, root: InterfaceRoot):
         """Load OpenAI agents."""
@@ -108,11 +108,11 @@ class TallyBot(Interface):
             raise RuntimeError(
                 "Tallybot requires openAI api key to work!"
             ) from None
-        self.assistant_map = {"Tallybot": agents.tallybot}
+        self.assistant_map = {"tallybot": agents.tallybot}
         self.db_path = root.conf["tallybot"]["database"]
 
     async def consume(self, package: Package):
         """Handle incoming message."""
         session = SQLiteSession(package.talker, self.db_path)
-        run = await Runner.run(self.assistant_map["Tallybot"], package.last_message.text, session=session)
+        run = await Runner.run(self.assistant_map["tallybot"], package.last_message.text, session=session)
         package.callback(run.final_output)
