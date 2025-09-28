@@ -2,6 +2,7 @@
 #
 # Git pre-commit hook to run before committing in project.
 set -e
+env/bin/tox
 #env/bin/black --check --diff tallybot tests
 #env/bin/flake8 tallybot tests
 #env/bin/python -m unittest -fb tests

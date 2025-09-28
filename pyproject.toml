@@ -3,7 +3,7 @@ requires = ["setuptools>=64", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-dynamic = ["version", "dependencies"]
+version = "0.0.1"
 name = "tallybot"
 authors = [{"name" = "Juris Kaminskis", "email" = "juris@kolumbs.net"}]
 readme = "README.md"
@@ -18,6 +18,15 @@ classifiers = [
 ]
 keywords = ["accountant", "finance", "bot", "chatbot", "budget", "expenses", "income"]
 requires-python = ">=3.11.1"
+dependencies = [
+    "openpyxl==3.1.5",
+    "pdftotext==2.2.2",
+    "zoozl==0.2.0",
+    "reportlab==4.2.5",
+    "openai-agents==0.3.0",
+    "requests>=2.31.0",
+    "numpy>=1.26,<2.0",
+]
 
 [project.urls]
 Repository = "https://github.com/Kolumbs/tallybot"

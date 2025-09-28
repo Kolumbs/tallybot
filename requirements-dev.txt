@@ -6,6 +6,7 @@ setuptools
 wheel
 build
 docformatter
+tox
 # for testing
 websockets
 # for mypy
