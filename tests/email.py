@@ -49,9 +49,9 @@ class PrivateIncome(base.AbstractEmailInterfaceTest):
             value: {self.val}"""
         self.email.set_content(content)
 
-    def test(self):
+    async def test(self):
         """Make private income entry."""
-        self.do_job_call()
+        await self.do_job_call()
         memory = membank.LoadMemory(self.conf["db_path"])
         booking = memory.get(
             memory.transaction.debit == 2310,
@@ -127,7 +127,7 @@ class DeleteTransaction(base.AbstractEmailInterfaceTest):
 class Assets(base.AbstractEmailInterfaceTest):
     """Testcase on asset depreciation."""
 
-    def test_asset_calculation(self):
+    async def test_asset_calculation(self):
         mem = self.memory
         val = 1000
         content = f"""
@@ -141,7 +141,7 @@ class Assets(base.AbstractEmailInterfaceTest):
             content=content, fname="asset", subtype="pdf", fn_obj=1
         )
         email["subject"] = "do add initial asset"
-        self.do_job_call(email, assert_status=False)
+        await self.do_job_call(email, assert_status=False)
         books = mem.get(mem.transaction.debit == 7420)
         self.assertEqual(len(books), 23)
         for i in books:

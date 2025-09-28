@@ -111,8 +111,8 @@ class TallyBot(Interface):
         self.assistant_map = {"Tallybot": agents.tallybot}
         self.db_path = root.conf["tallybot"]["database"]
 
-    def consume(self, package: Package):
+    async def consume(self, package: Package):
         """Handle incoming message."""
         session = SQLiteSession(package.talker, self.db_path)
-        run = Runner.run_sync(self.assistant_map["Tallybot"], package.last_message.text, session=session)
+        run = await Runner.run(self.assistant_map["Tallybot"], package.last_message.text, session=session)
         package.callback(run.final_output)

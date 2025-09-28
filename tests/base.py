@@ -265,11 +265,11 @@ class AbstractEmailInterfaceTest(TestCase):
         msg["subject"] = "do upwork statement"
         self.do_job_call(msg)
 
-    def do_job_call(self, msg: email.message.Message = None, assert_status=True):
+    async def do_job_call(self, msg: email.message.Message = None, assert_status=True):
         """Perform a job call."""
         if not msg:
             msg = self.email
-        self.email_bot.ask(msg)
+        await self.email_bot.ask(msg)
         self.response = self.email_bot.last_message()
         if assert_status:
             self.assertEqual("Done", self.email_bot.last_text(), self.response)

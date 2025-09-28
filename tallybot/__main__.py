@@ -9,6 +9,7 @@ from zoozl.server import start
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
+        prog="tallybot",
         description="Start tallybot server to listen to different inputs."
     )
     parser.add_argument(
@@ -19,7 +20,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
     with open(args.config_path, "rb") as f:
         config = tomllib.load(f)
-    zoozl_cfg = {}
+    if "tallybot" not in config:
+        print("No `tallybot` configuration found in config file.")
+        sys.exit(1)
+    zoozl_cfg = {
+        "extensions": ["tallybot.plugin"],
+        "tallybot": config["tallybot"],
+    }
     if "slack" in config:
         if "port" in config["slack"]:
             zoozl_cfg["slack_port"] = config["slack"]["port"]
