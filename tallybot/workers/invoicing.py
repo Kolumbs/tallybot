@@ -35,7 +35,9 @@ class JobResult:
 @function_tool
 async def do_book_invoice(w: RunContextWrapper[TallybotContext], invoice_data: InvoiceData) -> JobResult:
     """Book invoice in accounting system."""
-    return do_task(w.context.conf, w.context.memory, "do_add_expense", invoice_data)
+    msg, fbytes, fname = do_task(w.context.conf, w.context.memory, "do_add_expense", [invoice_data.model_dump()])
+    # Nothing happens with files atm
+    return msg.encode("utf-8").decode("unicode_escape")
 
 
 accounts_payable_clerk = Agent(
