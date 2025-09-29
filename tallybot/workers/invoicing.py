@@ -1,4 +1,5 @@
 """Agent for invoice booking."""
+
 from dataclasses import dataclass
 from typing_extensions import TypedDict
 from agents import Agent, function_tool, RunContextWrapper
@@ -18,9 +19,13 @@ class InvoiceData(pydantic.BaseModel):
     comment: str = pydantic.Field(description="Comment for the invoice")
     partner: str = pydantic.Field(description="Partner name")
     value: float = pydantic.Field(description="Invoice amount")
-    expense_account: str = pydantic.Field(description="Expense account code, e.g., 7120")
+    expense_account: str = pydantic.Field(
+        description="Expense account code, e.g., 7120"
+    )
     currency: str = pydantic.Field(description="Currency code, e.g., EUR")
-    split: float = pydantic.Field(description="Split percentage, e.g., 100 for full amount")
+    split: float = pydantic.Field(
+        description="Split percentage, e.g., 100 for full amount"
+    )
 
 
 @dataclass
@@ -33,11 +38,17 @@ class JobResult:
 
 
 @function_tool
-async def do_book_invoice(w: RunContextWrapper[TallybotContext], invoice_data: InvoiceData) -> JobResult:
+async def do_book_invoice(
+    w: RunContextWrapper[TallybotContext], invoice_data: InvoiceData
+) -> JobResult:
     """Book invoice in accounting system."""
-    msg, fbytes, fname = do_task(w.context.conf, w.context.memory, "do_add_expense", [invoice_data.model_dump()])
-    # Nothing happens with files atm
-    return msg.encode("utf-8").decode("unicode_escape")
+    msg, fbytes, fname = do_task(
+        w.context.conf,
+        w.context.memory,
+        "do_add_expense",
+        [invoice_data.model_dump()],
+    )
+    return msg
 
 
 accounts_payable_clerk = Agent(
@@ -51,6 +62,5 @@ accounts_payable_clerk = Agent(
         "Flag discrepancies for resolution."
         "Maintain the digital invoice filing system."
     ),
-    tools=[do_book_invoice]
+    tools=[do_book_invoice],
 )
-
