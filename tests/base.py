@@ -10,17 +10,23 @@ import random
 import tomllib
 from types import MappingProxyType
 import unittest
+from unittest.mock import MagicMock
 import uuid
 
 import membank
 import openpyxl
 
-from tallybot import brain
+from tallybot import brain, plugin
+from zoozl.chatbot import api, InterfaceRoot, Package
 from zoozl.tests import TestEmailbot
+
+
+__all__ = ["add_memory", "AgentTestCase", "BrainTestCase", "TestCase"]
 
 
 TEMP_STORAGE_PATH = "tests/tmp/"
 logging.basicConfig(level=logging.WARNING)
+
 
 class TestCase(unittest.IsolatedAsyncioTestCase):
     """Base test case."""
@@ -155,7 +161,9 @@ def construct_memory(conf: dict):
     if "tallybot" not in conf:
         raise ValueError(f"Configuration must contain tallybot: {conf}")
     if "database" not in conf["tallybot"]:
-        raise ValueError(f"tallybot config must contain database: {conf['tallybot']}")
+        raise ValueError(
+            f"tallybot config must contain database: {conf['tallybot']}"
+        )
     db_path = f'sqlite://{conf["tallybot"]["database"]}'
     return membank.LoadMemory(db_path)
 
@@ -265,7 +273,9 @@ class AbstractEmailInterfaceTest(TestCase):
         msg["subject"] = "do upwork statement"
         self.do_job_call(msg)
 
-    async def do_job_call(self, msg: email.message.Message = None, assert_status=True):
+    async def do_job_call(
+        self, msg: email.message.Message = None, assert_status=True
+    ):
         """Perform a job call."""
         if not msg:
             msg = self.email
@@ -317,6 +327,36 @@ def add_date(payload, fmt=None):
             break
     if "date" not in payload:
         payload["date"] = today.strftime(fmt) if fmt else today.isoformat()
+
+
+class AgentTestCase(TestCase):
+    """Abstract testcase using OpenAI LLM agent as testing interface.
+
+    Calls are made to agent functions directly.
+    """
+
+    @add_memory
+    def setUp(self):
+        """Load required methods for agent do_task calls."""
+        self.maxDiff = None
+        self.callback = MagicMock()
+
+    async def asyncSetUp(self):
+        """Async setup."""
+        self.agent = plugin.TallyBot()
+
+    async def ask(self, message):
+        """Ask agent."""
+        self.root = InterfaceRoot(self.config)
+        self.root.memory = self.memory
+        self.agent.load(self.root)
+        package = Package(
+            api.Conversation(talker="test_talker"),
+            self.callback
+        )
+        package.conversation.messages.append(api.Message(message))
+        await self.agent.consume(package)
+        return package.last_message.text
 
 
 class BrainTestCase(TestCase):

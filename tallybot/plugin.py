@@ -1,9 +1,9 @@
 """Tallybot plugin to zoozl server."""
 
-from agents import set_default_openai_key, Runner, SQLiteSession
+from agents import set_default_openai_key, Runner, SQLiteSession, RunContextWrapper
 from zoozl.chatbot import Interface, Package, InterfaceRoot
 
-from . import agents
+from . import workers
 
 
 class TallyBot(Interface):
@@ -20,14 +20,21 @@ class TallyBot(Interface):
             raise RuntimeError(
                 "Tallybot requires openAI api key to work!"
             ) from None
-        self.assistant_map = {"tallybot": agents.tallybot}
-        self.db_path = root.conf["tallybot"]["database"]
+        self.assistant_map = {"tallybot": workers.tallybot}
+        self.conf = root.conf
+        self.db_path = self.conf["tallybot"]["database"]
+        self.memory = root.memory
 
     async def consume(self, package: Package):
         """Handle incoming message."""
+        context = RunContextWrapper(workers.TallybotContext(
+            conf=self.conf["tallybot"],
+            memory=self.memory
+        ))
         run = await Runner.run(
             self.assistant_map["tallybot"],
             package.last_message.text,
             session=SQLiteSession(package.talker, self.db_path),
+            context=context.context
         )
         package.callback(run.final_output)

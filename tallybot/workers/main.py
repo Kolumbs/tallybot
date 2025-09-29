@@ -3,7 +3,7 @@
 from zoozl.agentgear import BaseAgent, FunctionSchema
 from agents import Agent
 
-from . import invoice
+from . import invoicing
 
 
 TallyBotTransfer = FunctionSchema(
@@ -81,5 +81,5 @@ TALLYBOT_PROMPT2 = (
 tallybot = Agent(
     name="Tallybot",
     instructions=TALLYBOT_PROMPT1,
-    tools=[invoice.accounts_payable_clerk.as_tool(tool_name="accounts_payable_clerk", tool_description="You can book invoices with this tool.")],
+    tools=[invoicing.accounts_payable_clerk.as_tool(tool_name="accounts_payable_clerk", tool_description="You can book invoices with this tool.")],
 )

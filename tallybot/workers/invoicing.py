@@ -7,6 +7,7 @@ import membank
 import pydantic
 
 from ..brain import do_task
+from .base import TallybotContext
 
 
 class InvoiceData(pydantic.BaseModel):
@@ -29,13 +30,6 @@ class JobResult:
     status: str
     attachment: bytes
     attachment_filename: str
-
-@dataclass
-class TallybotContext:
-    """Context for Tallybot."""
-
-    conf: dict
-    memory: membank.LoadMemory
 
 
 @function_tool

@@ -1,4 +1,4 @@
-"""Tallybot agent list.
+"""Tallybot workers.
 
 Main idea around tallybot agents is to utilise simple orchestration,
 where there is one main agent that must be aware of all other agents and
@@ -17,7 +17,8 @@ Usage of agent:
     >>> print(run.final_output)
 """
 
+from .base import TallybotContext
 from .main import tallybot
 
 
-__all__ = ["tallybot"]
+__all__ = ["tallybot", "TallybotContext"]
