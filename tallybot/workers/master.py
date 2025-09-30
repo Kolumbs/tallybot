@@ -1,0 +1,34 @@
+"""Workers that work with master data management."""
+
+import pydantic
+from agents import Agent, function_tool, RunContextWrapper
+from .base import TallybotContext
+from ..brain import do_task
+
+
+class CreatePartnerData(pydantic.BaseModel):
+    """Data for creating new partner."""
+
+    name: str = pydantic.Field(
+        description="Partner name as shown in accounting system"
+    )
+    other_names: list[str] = pydantic.Field(
+        description="Other names or aliases for the partner"
+    )
+
+
+@function_tool
+async def do_register_partner(
+    w: RunContextWrapper[TallybotContext], data: CreatePartnerData
+) -> str:
+    """Create a new partner in the system."""
+    partner = data.model_dump()
+    partner["other_names"] = ",".join(data.other_names)
+
+    msg, fbytes, fname = do_task(
+        w.context.conf,
+        w.context.memory,
+        "do_create_partner",
+        [partner],
+    )
+    return msg

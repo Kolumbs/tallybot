@@ -1,9 +1,11 @@
 """Tallybot main agent."""
 
+import pydantic
+from agents import Agent, function_tool, RunContextWrapper
+from .base import TallybotContext
 from zoozl.agentgear import BaseAgent, FunctionSchema
-from agents import Agent
 
-from . import invoicing
+from . import invoicing, master
 
 
 TallyBotTransfer = FunctionSchema(
@@ -75,11 +77,29 @@ TALLYBOT_PROMPT2 = (
     "If there is no agent that can execute particular task,"
     "apologise that you can't complete it and wait for other tasks."
     "Immediately when you know which task to handle execute it."
+    "Prioritise delegation, speed and brevity"
 )
+
+
+class Attachments(pydantic.BaseModel):
+    """Data for creating new partner."""
+
+    name: str = pydantic.Field(
+        description="Partner name as shown in accounting system"
+    )
+    other_names: list[str] = pydantic.Field(
+        description="Other names or aliases for the partner"
+    )
 
 
 tallybot = Agent(
     name="Tallybot",
-    instructions=TALLYBOT_PROMPT1,
-    tools=[invoicing.accounts_payable_clerk.as_tool(tool_name="accounts_payable_clerk", tool_description="You can book invoices with this tool.")],
+    instructions=TALLYBOT_PROMPT2,
+    tools=[
+        invoicing.accounts_payable_clerk.as_tool(
+            tool_name="accounts_payable_clerk",
+            tool_description="You can book invoices with this tool.",
+        ),
+        master.do_register_partner,
+    ],
 )

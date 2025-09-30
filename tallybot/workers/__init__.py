@@ -17,8 +17,8 @@ Usage of agent:
     >>> print(run.final_output)
 """
 
-from .base import TallybotContext
+from .base import TallybotContext, FileContext
 from .main import tallybot
 
 
-__all__ = ["tallybot", "TallybotContext"]
+__all__ = ["tallybot", "TallybotContext", "FileContext"]

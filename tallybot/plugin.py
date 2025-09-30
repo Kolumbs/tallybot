@@ -1,9 +1,17 @@
 """Tallybot plugin to zoozl server."""
 
-from agents import set_default_openai_key, Runner, SQLiteSession, RunContextWrapper
+from agents import (
+    set_default_openai_key,
+    Runner,
+    SQLiteSession,
+    RunContextWrapper,
+)
 from zoozl.chatbot import Interface, Package, InterfaceRoot
 
 from . import workers
+import logging
+
+log = logging.getLogger(__name__)
 
 
 class TallyBot(Interface):
@@ -27,14 +35,25 @@ class TallyBot(Interface):
 
     async def consume(self, package: Package):
         """Handle incoming message."""
-        context = RunContextWrapper(workers.TallybotContext(
-            conf=self.conf["tallybot"],
-            memory=self.memory
-        ))
+        context = RunContextWrapper(
+            workers.TallybotContext(
+                conf=self.conf["tallybot"],
+                memory=self.memory,
+                attachments=[
+                    workers.FileContext(
+                        binary=i.binary,
+                        media_type=i.media_type,
+                        filename=i.filename,
+                    )
+                    for i in package.last_message.parts
+                    if i.binary
+                ],
+            )
+        )
         run = await Runner.run(
             self.assistant_map["tallybot"],
             package.last_message.text,
             session=SQLiteSession(package.talker, self.db_path),
-            context=context.context
+            context=context.context,
         )
         package.callback(run.final_output)

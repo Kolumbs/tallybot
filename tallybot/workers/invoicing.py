@@ -3,12 +3,16 @@
 from dataclasses import dataclass
 from typing_extensions import TypedDict
 from agents import Agent, function_tool, RunContextWrapper
+import logging
 
 import membank
 import pydantic
 
 from ..brain import do_task
 from .base import TallybotContext
+
+
+log = logging.getLogger(__name__)
 
 
 class InvoiceData(pydantic.BaseModel):
@@ -40,15 +44,29 @@ class JobResult:
 @function_tool
 async def do_book_invoice(
     w: RunContextWrapper[TallybotContext], invoice_data: InvoiceData
-) -> JobResult:
+) -> str:
     """Book invoice in accounting system."""
+    if len(w.context.attachments) > 1:
+        return "Too many attachments, please attach only one invoice file."
+    attachment = None
+    if len(w.context.attachments) == 1:
+        attachment = w.context.attachments[0].binary
     msg, fbytes, fname = do_task(
         w.context.conf,
         w.context.memory,
         "do_add_expense",
         [invoice_data.model_dump()],
+        attachment,
     )
     return msg
+
+
+@function_tool
+async def get_user_last_attachments(
+    w: RunContextWrapper[TallybotContext],
+) -> str:
+    """Return a list of filenames attached to the last message."""
+    return [i.filename for i in w.context.attachments]
 
 
 accounts_payable_clerk = Agent(
@@ -61,6 +79,10 @@ accounts_payable_clerk = Agent(
         "Ensure coding to correct accounts."
         "Flag discrepancies for resolution."
         "Maintain the digital invoice filing system."
+        "Each invoice booked must contain attachment from user as proof of entry"
     ),
-    tools=[do_book_invoice],
+    tools=[
+        do_book_invoice,
+        get_user_last_attachments,
+    ],
 )
