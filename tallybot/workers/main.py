@@ -100,6 +100,10 @@ tallybot = Agent(
             tool_name="accounts_payable_clerk",
             tool_description="You can book invoices with this tool.",
         ),
+        invoicing.bank_statement_clerk.as_tool(
+            tool_name="bank_statement_clerk",
+            tool_description="You can book bank statements with this tool.",
+        ),
         master.do_register_partner,
     ],
 )
