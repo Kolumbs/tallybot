@@ -345,16 +345,23 @@ class AgentTestCase(TestCase):
         """Async setup."""
         self.agent = plugin.TallyBot()
 
-    async def ask(self, message):
+    async def ask(
+        self, message, fbytes=None, fname="file.pdf", ftype="application/pdf"
+    ):
         """Ask agent."""
         self.root = InterfaceRoot(self.config)
         self.root.memory = self.memory
         self.agent.load(self.root)
-        package = Package(
-            api.Conversation(talker="test_talker"),
-            self.callback
-        )
-        package.conversation.messages.append(api.Message(message))
+        package = Package(api.Conversation(talker="test_talker"), self.callback)
+        msg = api.Message(message)
+        if fbytes is not None:
+            part = api.MessagePart(
+                binary=fbytes,
+                media_type=ftype,
+                filename=fname,
+            )
+            msg.parts.append(part)
+        package.conversation.messages.append(msg)
         await self.agent.consume(package)
         return package.last_message.text
 

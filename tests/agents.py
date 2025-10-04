@@ -13,15 +13,23 @@ class DoInvoice(bs.AgentTestCase):
 
     async def test(self):
         """Verify booking correctly an invoice."""
-        await self.ask("Book an invoice for 110 USD")
-        await self.ask(
-                "Invoice date: 2023-10-10\n"
-                "Reference: INV-1001\n"
-                "Comment: Office supplies\n"
-                "Partner: OfficeMart\n"
-                "Value: 100\n"
-                "Expense account: 6120\n"
-                "Currency: USD\n"
-                "Split: 100"
+        booking = self.memory.get.transaction(date="2023-10-10")
+        self.assertIsNone(
+            booking, "Precondition failed, booking already exists."
         )
-        self.callback.assert_called_with("Zub")
+        await self.ask(
+            "Book an invoice for 110 USD and create partner, if needed.",
+        )
+        await self.ask(
+            "Invoice date: 2023-10-10\n"
+            "Reference: INV-1001\n"
+            "Comment: Office supplies\n"
+            "Partner: OfficeMart\n"
+            "Value: 100\n"
+            "Expense account: 7120\n"
+            "Currency: USD\n"
+            "Split: 100",
+            fbytes=b"pdf-09293"
+        )
+        booking = self.memory.get.transaction(date="2023-10-10")
+        self.assertIsNotNone(booking, self.callback.call_args)
