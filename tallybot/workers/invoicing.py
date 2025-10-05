@@ -111,8 +111,6 @@ async def save_bank_statement(w: RunContextWrapper[TallybotContext]) -> str:
         )
     if len(w.context.attachments) == 0:
         return "No attachment found, please attach the bank statement file."
-    if w.context.attachments[0].media_type != "text/csv":
-        return "Unsupported file type, please attach a csv file format."
     with Perform(
         w.context.conf,
         w.context.memory,
