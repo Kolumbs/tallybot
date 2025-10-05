@@ -33,3 +33,20 @@ class DoInvoice(bs.AgentTestCase):
         )
         booking = self.memory.get.transaction(date="2023-10-10")
         self.assertIsNotNone(booking, self.callback.call_args)
+
+
+class DoStatement(bs.AgentTestCase):
+    """Test conversation to process a bank statement."""
+
+    async def test(self):
+        """Verify processing correctly a bank statement."""
+        booking = self.memory.get.transaction(date="2023-10-11")
+        self.assertIsNone(
+            booking, "Precondition failed, booking already exists."
+        )
+        await self.ask(
+            "Process the attached bank statement and book the transactions.",
+            fbytes=b"pdf-09293"
+        )
+        booking = self.memory.get.transaction(date="2023-10-11")
+        self.assertIsNotNone(booking, self.callback.call_args)

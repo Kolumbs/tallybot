@@ -39,4 +39,12 @@ async def get_user_last_attachments(
     w: RunContextWrapper[TallybotContext],
 ) -> str:
     """Return a list of filenames attached to the last message."""
-    return [i.filename for i in w.context.attachments]
+    return [
+        {
+            "file_type": i.media_type,
+            "size": len(i.binary),
+            "file_name": i.filename,
+        }
+        for i in w.context.package.last_message.parts
+        if i.binary
+    ]

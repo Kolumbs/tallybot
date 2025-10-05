@@ -1,6 +1,7 @@
 """Tallybot plugin to zoozl server."""
 
 import datetime
+import json
 
 from agents import (
     set_default_openai_key,
@@ -52,7 +53,7 @@ class TallyBot(Interface):
             workers.TallybotContext(
                 conf=self.conf["tallybot"],
                 memory=self.memory,
-                conversation=package.conversation,
+                package=package,
                 attachments=attachments,
             )
         )
@@ -77,5 +78,6 @@ def input_callable(
     history: list[TResponseInputItem], new: list[TResponseInputItem]
 ) -> list[TResponseInputItem]:
     """Input callable to pass context."""
-    log.warning("HISTORY %s", history)
+    log.warning("HISTORY %s", json.dumps(history, indent=2))
+    log.warning("NEW %s", json.dumps(new, indent=2))
     return history + new
