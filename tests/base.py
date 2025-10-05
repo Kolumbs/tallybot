@@ -335,6 +335,7 @@ class AgentTestCase(TestCase):
     Calls are made to agent functions directly.
     """
 
+    @add_clean_memory
     @add_memory
     def setUp(self):
         """Load required methods for agent do_task calls."""

@@ -1,9 +1,4 @@
-"""Interface on any logical tasks accountant can perform.
-
->>> with Perform(conf, mem, "do_get_help", {}, b'') as job:
->>>     print(job.status, job.attachment, job.attachment_filename)
->>> assert job.status == "Done"
-"""
+"""Interface on any logical tasks accountant can perform."""
 
 import csv
 from dataclasses import asdict
@@ -32,8 +27,8 @@ def do_task(conf, mem, cmd, data=None, attachment=None):
     None)
     """
     try:
-        with Perform(conf, mem, cmd, data, attachment) as job:
-            return (job.status, job.attachment, job.attachment_filename)
+        with Perform(conf, mem) as job:
+            return job.run_job(cmd, data, attachment)
     except RuntimeWarning as err:
         return (str(err), None, None)
     except Exception:

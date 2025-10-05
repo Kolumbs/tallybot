@@ -264,3 +264,11 @@ def save_file(full_path, binary):
         raise RuntimeWarning(f"File already exists in {full_path}")
     with open(full_path, mode="wb") as fname:
         fname.write(binary)
+
+
+def get_file(full_path):
+    """Get file binary from full path."""
+    if not os.path.exists(full_path):
+        raise RuntimeWarning(f"File does not exist in {full_path}")
+    with open(full_path, mode="rb") as fname:
+        return fname.read()

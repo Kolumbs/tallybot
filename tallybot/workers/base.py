@@ -1,10 +1,17 @@
 """Shared objects within workers package."""
 
+import sys
+import logging
+import traceback
 import uuid
 import membank
+from functools import wraps
 
 from dataclasses import dataclass
 from zoozl.chatbot import Package
+
+
+log = logging.getLogger(__name__)
 
 
 @dataclass
@@ -30,3 +37,17 @@ class TallybotContext:
     memory: membank.LoadMemory
     package: Package
     attachments: list[FileContext]
+
+
+def catch_exceptions(coro):
+    """Decorator to catch exceptions in coros."""
+
+    @wraps(coro)
+    async def wrapper(*args, **kwargs):
+        try:
+            return await coro(*args, **kwargs)
+        except Exception:
+            log.exception("Exception in %s", coro.__name__)
+            return "".join(traceback.format_exception(*sys.exc_info()))
+
+    return wrapper

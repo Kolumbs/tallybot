@@ -1,16 +1,15 @@
 """Agent for invoice booking."""
 
 from dataclasses import dataclass
-from typing_extensions import TypedDict
 from agents import Agent, function_tool, RunContextWrapper
 import logging
 
-import membank
 import pydantic
 
-from ..brain import do_task
+from ..brain import do_task, Perform
+from .. import handlers
 from . import master
-from .base import TallybotContext
+from .base import TallybotContext, FileContext, catch_exceptions
 
 
 log = logging.getLogger(__name__)
@@ -49,15 +48,14 @@ async def do_book_invoice(
     """Book invoice in accounting system."""
     if len(w.context.attachments) > 1:
         return "Too many attachments, please attach only one invoice file."
-    attachment = None
-    if len(w.context.attachments) == 1:
-        attachment = w.context.attachments[0].binary
+    if len(w.context.attachments) == 0:
+        return "No attachment found, please attach the invoice file."
     msg, fbytes, fname = do_task(
         w.context.conf,
         w.context.memory,
         "do_add_expense",
         [invoice_data.model_dump()],
-        attachment,
+        w.context.attachments[0].binary,
     )
     return msg
 
@@ -72,7 +70,6 @@ accounts_payable_clerk = Agent(
         "Ensure coding to correct accounts."
         "Flag discrepancies for resolution."
         "Maintain the digital invoice filing system."
-        "Each invoice booked must contain attachment from user as proof of entry"
     ),
     tools=[
         do_book_invoice,
@@ -92,15 +89,64 @@ async def do_seb_statement_import(
         )
     if len(w.context.attachments) == 0:
         return "No attachment found, please attach the bank statement file."
-    attachment = w.context.attachments[0].binary
+    if w.context.attachments[0].media_type != "text/csv":
+        return "Unsupported file type, please attach a csv file format."
     msg, fbytes, fname = do_task(
         w.context.conf,
         w.context.memory,
         "do_seb_statement",
         [],
-        attachment,
+        w.context.attachments[0].binary,
     )
     return msg
+
+
+@function_tool
+@catch_exceptions
+async def save_bank_statement(w: RunContextWrapper[TallybotContext]) -> str:
+    """Save bank statement on desktop."""
+    if len(w.context.attachments) > 1:
+        return (
+            "Too many attachments, please attach only one bank statement file."
+        )
+    if len(w.context.attachments) == 0:
+        return "No attachment found, please attach the bank statement file."
+    if w.context.attachments[0].media_type != "text/csv":
+        return "Unsupported file type, please attach a csv file format."
+    with Perform(
+        w.context.conf,
+        w.context.memory,
+    ) as job:
+        handlers.save_file(
+            job.generate_path("desktop", "csv", "seb_statement"),
+            w.context.attachments[0].binary,
+        )
+    return "Bank statement `seb_statement.csv` saved."
+
+
+@function_tool
+@catch_exceptions
+async def retrieve_bank_statement(
+    w: RunContextWrapper[TallybotContext],
+) -> str:
+    """Retrieve bank statement from desktop."""
+    if len(w.context.attachments) > 0:
+        return "There is already attachment attached. Cannot overwrite"
+    with Perform(
+        w.context.conf,
+        w.context.memory,
+    ) as job:
+        w.context.attachments = [
+            FileContext(
+                binary=handlers.get_file(
+                    job.generate_path(
+                        "uploaded_documents", "csv", "seb_statement"
+                    )
+                ),
+                media_type="text/csv",
+                filename="seb_statement.csv",
+            )
+        ]
 
 
 bank_statement_clerk = Agent(
@@ -108,15 +154,13 @@ bank_statement_clerk = Agent(
     instructions=(
         "You are Bank Statement Clerk."
         "Main focus: Loading bank statements into the accounting system."
-        "Download bank statements from all company bank accounts in approved formats."
-        "Verify each statement belongs to the correct bank account and accounting period."
-        "Upload the statement files into the accounting system using provided import tools."
-        "Confirm successful import by checking transaction totals and balances."
-        "Flag and report any upload errors or discrepancies to the responsible officer."
-        "Archive the original bank statement files in the designated secure folder."
-        "Each loaded statement must have a corresponding system log entry as proof of upload."
+        "Save bank statement on your desktop."
+        "Process bank statement through the accounting system. If necessary load file"
+        "from your desktop"
     ),
     tools=[
+        save_bank_statement,
+        retrieve_bank_statement,
         do_seb_statement_import,
         master.get_user_last_attachments,
     ],

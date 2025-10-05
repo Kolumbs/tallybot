@@ -2,6 +2,7 @@
 
 Primarily functions on handling Excel reports
 """
+
 import datetime
 
 from .. import handlers, memories
@@ -29,7 +30,10 @@ def add_reports(cls):
                 (mem.transaction.credit_stack, mem.transaction.credit),
             )
             args = [None, None]
-            args += [mem.transaction.date >= year_start, mem.transaction.date <= year_end]
+            args += [
+                mem.transaction.date >= year_start,
+                mem.transaction.date <= year_end,
+            ]
             for i in filters:
                 # pylint: disable=C0121
                 args[0] = i[0] > 0

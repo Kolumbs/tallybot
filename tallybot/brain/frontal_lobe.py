@@ -12,24 +12,30 @@ class Functions():
     """Adds function set to main brain.Perform class."""
 
     # pylint: disable=too-many-instance-attributes,too-many-arguments
-    def __init__(self, conf, memory, cmd, data, attachment):
+    def __init__(self, conf, memory):
         """Init and call executor."""
         self.attachment = None
         self.attachment_filename = None
         self.ecb_xml_memory = None
-        self.binary = attachment
-        self.data = data
+        self.binary = None
+        self.data = None
         self.memory = memory
         self.conf = conf
         self.trips = set()
-        self.status = "Done"
-        getattr(self, cmd)()
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_msg, exc_tr):
         pass
+
+    def run_job(self, job_name, payload, attachment=None):
+        """Run a job by name."""
+        self.data = payload
+        self.binary = attachment
+        getattr(self, job_name)()
+        self.status = "Done"
+        return (self.status, self.attachment, self.attachment_filename)
 
     def prepare_trip_report(self, date, tahometer=False):
         """Prepare an excel binary report of trips."""
@@ -52,7 +58,7 @@ class Functions():
         """Pre-generates file save path."""
         if not filename:
             filename = str(uuid.uuid1()).split('-', maxsplit=1)[0]
-        if group not in ["out_invoice", "inc_invoice", "statement"]:
+        if group not in ["out_invoice", "inc_invoice", "statement", "desktop"]:
             raise RuntimeWarning(f"Not possible to find a path to save '{group}'")
         path = self.conf[group + "_path"]
         dirname = os.path.dirname(path)

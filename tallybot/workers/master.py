@@ -1,7 +1,7 @@
 """Workers that work with master data management."""
 
 import pydantic
-from agents import Agent, function_tool, RunContextWrapper
+from agents import function_tool, RunContextWrapper
 from .base import TallybotContext
 from ..brain import do_task
 

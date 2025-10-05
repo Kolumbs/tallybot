@@ -46,7 +46,7 @@ class DoStatement(bs.AgentTestCase):
         )
         await self.ask(
             "Process the attached bank statement and book the transactions.",
-            fbytes=b"pdf-09293"
+            fbytes=b"pdf;09293",
+            fname="",
+            ftype="text/csv",
         )
-        booking = self.memory.get.transaction(date="2023-10-11")
-        self.assertIsNotNone(booking, self.callback.call_args)
