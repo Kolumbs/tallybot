@@ -118,6 +118,7 @@ async def save_bank_statement(w: RunContextWrapper[TallybotContext]) -> str:
         handlers.save_file(
             job.generate_path("desktop", "csv", "seb_statement"),
             w.context.attachments[0].binary,
+            overwrite=True,
         )
     w.context.attachments = FileContext(
         binary=w.context.attachments[0].binary,
@@ -157,9 +158,8 @@ bank_statement_clerk = Agent(
     instructions=(
         "You are Bank Statement Clerk."
         "Main focus: Loading bank statements into the accounting system."
-        "Save bank statement on your desktop."
-        "Process bank statement through the accounting system. If necessary load file"
-        "from your desktop"
+        "Save or load bank statement from your desktop."
+        "Process bank statement through the accounting system."
     ),
     tools=[
         save_bank_statement,

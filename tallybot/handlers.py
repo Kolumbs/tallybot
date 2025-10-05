@@ -258,9 +258,9 @@ def get_invoice(text):
     )
 
 
-def save_file(full_path, binary):
+def save_file(full_path, binary, overwrite=False):
     """Save binary file as per full_path."""
-    if os.path.exists(full_path):
+    if os.path.exists(full_path) and not overwrite:
         raise RuntimeWarning(f"File already exists in {full_path}")
     with open(full_path, mode="wb") as fname:
         fname.write(binary)
