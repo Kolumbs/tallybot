@@ -32,3 +32,11 @@ async def do_register_partner(
         [partner],
     )
     return msg
+
+
+@function_tool
+async def get_user_last_attachments(
+    w: RunContextWrapper[TallybotContext],
+) -> str:
+    """Return a list of filenames attached to the last message."""
+    return [i.filename for i in w.context.attachments]

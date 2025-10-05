@@ -61,14 +61,6 @@ async def do_book_invoice(
     return msg
 
 
-@function_tool
-async def get_user_last_attachments(
-    w: RunContextWrapper[TallybotContext],
-) -> str:
-    """Return a list of filenames attached to the last message."""
-    return [i.filename for i in w.context.attachments]
-
-
 accounts_payable_clerk = Agent(
     name="accounts_payable_clerk",
     instructions=(
@@ -83,7 +75,6 @@ accounts_payable_clerk = Agent(
     ),
     tools=[
         do_book_invoice,
-        get_user_last_attachments,
     ],
 )
 
@@ -94,7 +85,9 @@ async def do_seb_statement_import(
 ) -> str:
     """Import SEB bank statement into accounting system."""
     if len(w.context.attachments) > 1:
-        return "Too many attachments, please attach only one bank statement file."
+        return (
+            "Too many attachments, please attach only one bank statement file."
+        )
     if len(w.context.attachments) == 0:
         return "No attachment found, please attach the bank statement file."
     attachment = w.context.attachments[0].binary
@@ -106,6 +99,7 @@ async def do_seb_statement_import(
         attachment,
     )
     return msg
+
 
 bank_statement_clerk = Agent(
     name="bank_statement_clerk",
@@ -122,6 +116,5 @@ bank_statement_clerk = Agent(
     ),
     tools=[
         do_seb_statement_import,
-        get_user_last_attachments
-    ]
+    ],
 )
