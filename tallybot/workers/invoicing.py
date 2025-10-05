@@ -119,6 +119,11 @@ async def save_bank_statement(w: RunContextWrapper[TallybotContext]) -> str:
             job.generate_path("desktop", "csv", "seb_statement"),
             w.context.attachments[0].binary,
         )
+    w.context.attachments = FileContext(
+        binary=w.context.attachments[0].binary,
+        media_type="text/csv",
+        filename="seb_statement.csv",
+    )
     return "Bank statement `seb_statement.csv` saved."
 
 
