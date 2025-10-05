@@ -9,6 +9,7 @@ import membank
 import pydantic
 
 from ..brain import do_task
+from . import master
 from .base import TallybotContext
 
 
@@ -75,6 +76,7 @@ accounts_payable_clerk = Agent(
     ),
     tools=[
         do_book_invoice,
+        master.get_user_last_attachments,
     ],
 )
 
@@ -116,5 +118,6 @@ bank_statement_clerk = Agent(
     ),
     tools=[
         do_seb_statement_import,
+        master.get_user_last_attachments,
     ],
 )

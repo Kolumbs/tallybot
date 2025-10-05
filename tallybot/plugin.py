@@ -1,10 +1,14 @@
 """Tallybot plugin to zoozl server."""
 
+import datetime
+
 from agents import (
     set_default_openai_key,
     Runner,
     SQLiteSession,
     RunContextWrapper,
+    RunConfig,
+    TResponseInputItem,
 )
 from zoozl.chatbot import Interface, Package, InterfaceRoot
 
@@ -35,25 +39,43 @@ class TallyBot(Interface):
 
     async def consume(self, package: Package):
         """Handle incoming message."""
+        attachments = [
+            workers.FileContext(
+                binary=i.binary,
+                media_type=i.media_type,
+                filename=i.filename,
+            )
+            for i in package.last_message.parts
+            if i.binary
+        ]
         context = RunContextWrapper(
             workers.TallybotContext(
                 conf=self.conf["tallybot"],
                 memory=self.memory,
-                attachments=[
-                    workers.FileContext(
-                        binary=i.binary,
-                        media_type=i.media_type,
-                        filename=i.filename,
-                    )
-                    for i in package.last_message.parts
-                    if i.binary
-                ],
+                conversation=package.conversation,
+                attachments=attachments,
             )
         )
         run = await Runner.run(
             self.assistant_map["tallybot"],
-            package.last_message.text,
+            [
+                {"role": "user", "content": package.last_message.text},
+                {
+                    "role": "system",
+                    "content": f"Time: {datetime.datetime.now().isoformat()}\n"
+                    f"Attachments:{len(attachments)}.",
+                },
+            ],
+            run_config=RunConfig(session_input_callback=input_callable),
             session=SQLiteSession(package.talker, self.db_path),
             context=context.context,
         )
         package.callback(run.final_output)
+
+
+def input_callable(
+    history: list[TResponseInputItem], new: list[TResponseInputItem]
+) -> list[TResponseInputItem]:
+    """Input callable to pass context."""
+    log.warning("HISTORY %s", history)
+    return history + new

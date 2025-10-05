@@ -4,6 +4,7 @@ import uuid
 import membank
 
 from dataclasses import dataclass
+from zoozl.chatbot import Conversation
 
 
 @dataclass
@@ -27,4 +28,5 @@ class TallybotContext:
 
     conf: dict
     memory: membank.LoadMemory
+    conversation: Conversation
     attachments: list[FileContext]

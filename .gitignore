@@ -6,6 +6,9 @@ __pycache__/
 *.sh
 *.png
 
+# Test artifacts
+tests/tmp
+
 # C extensions
 *.so
 
