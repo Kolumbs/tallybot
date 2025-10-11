@@ -10,7 +10,7 @@ from zoozl.server import start
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="tallybot",
-        description="Start tallybot server to listen to different inputs."
+        description="Start tallybot server to listen to different inputs.",
     )
     parser.add_argument(
         "config_path",
@@ -23,7 +23,13 @@ if __name__ == "__main__":
     if "tallybot" not in config:
         print("No `tallybot` configuration found in config file.")
         sys.exit(1)
+    if "database" not in config["tallybot"]:
+        print(
+            "No `database` configuration found in `tallybot` section of config file."
+        )
+        sys.exit(1)
     zoozl_cfg = {
+        "memory_path": f'sqlite://{config["database"]}',
         "extensions": ["tallybot.plugin"],
         "tallybot": config["tallybot"],
     }
@@ -31,10 +37,14 @@ if __name__ == "__main__":
         if "port" in config["slack"]:
             zoozl_cfg["slack_port"] = config["slack"]["port"]
         else:
-            print("No slack port specified in config file. Using default port 8080.")
+            print(
+                "No slack port specified in config file. Using default port 8080."
+            )
             zoozl_cfg["slack_port"] = 8080
         if "signing_secret" in config["slack"]:
-            zoozl_cfg["slack_signing_secret"] = config["slack"]["signing_secret"]
+            zoozl_cfg["slack_signing_secret"] = config["slack"][
+                "signing_secret"
+            ]
         else:
             print("No slack signing secret specified in config file. Exiting.")
             sys.exit(1)
