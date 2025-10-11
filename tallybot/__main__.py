@@ -29,7 +29,7 @@ if __name__ == "__main__":
         )
         sys.exit(1)
     zoozl_cfg = {
-        "memory_path": f'sqlite://{config["database"]}',
+        "memory_path": f'sqlite://{config["tallybot"]["database"]}',
         "extensions": ["tallybot.plugin"],
         "tallybot": config["tallybot"],
     }
