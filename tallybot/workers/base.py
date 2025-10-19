@@ -8,7 +8,7 @@ import membank
 from functools import wraps
 
 from dataclasses import dataclass
-from zoozl.chatbot import Package
+from zoozl.chatbot import Package, MessagePart
 
 
 log = logging.getLogger(__name__)
@@ -37,6 +37,7 @@ class TallybotContext:
     memory: membank.LoadMemory
     package: Package
     attachments: list[FileContext]
+    message_parts: list[MessagePart]
 
 
 def catch_exceptions(coro):

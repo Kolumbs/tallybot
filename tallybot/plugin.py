@@ -11,7 +11,7 @@ from agents import (
     RunConfig,
     TResponseInputItem,
 )
-from zoozl.chatbot import Interface, Package, InterfaceRoot
+from zoozl.chatbot import Interface, Package, InterfaceRoot, Message, MessagePart
 
 from . import workers
 import logging
@@ -55,6 +55,7 @@ class TallyBot(Interface):
                 memory=self.memory,
                 package=package,
                 attachments=attachments,
+                message_parts=[],
             )
         )
         run = await Runner.run(
@@ -71,7 +72,12 @@ class TallyBot(Interface):
             session=SQLiteSession(package.talker, self.db_path),
             context=context.context,
         )
-        package.callback(run.final_output)
+        msg = Message(author="agent")
+        if context.context.message_parts:
+            for f in context.context.message_parts:
+                msg.parts.append(f)
+        msg.parts.append(MessagePart(text=run.final_output))
+        package.callback(msg)
 
 
 def input_callable(
