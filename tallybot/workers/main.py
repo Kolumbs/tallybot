@@ -3,7 +3,7 @@
 import pydantic
 from agents import Agent
 
-from . import invoicing, master
+from . import invoicing, master, controller
 
 
 TALLYBOT = (
@@ -39,6 +39,10 @@ tallybot = Agent(
         invoicing.bank_statement_clerk.as_tool(
             tool_name="bank_statement_clerk",
             tool_description="You can book bank statements with this tool.",
+        ),
+        controller.accounts_compliance_officer.as_tool(
+            tool_name="accounts_compliance_officer",
+            tool_description="You can ensure accounting compliance with this tool.",
         ),
         master.get_user_last_attachments,
         master.do_register_partner,
