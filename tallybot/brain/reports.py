@@ -8,9 +8,8 @@ import datetime
 from .. import handlers, memories
 
 
-def get_report_struct(self, data):
+def get_report_struct(data, mem):
     """Get report structure from data."""
-    mem = self.memory
     if data:
         year = int(data.get("year", datetime.date.today().year))
     else:
@@ -32,7 +31,7 @@ def get_report_struct(self, data):
         args[0] = i[0] > 0
         for account in [2310, 5310]:
             args[1] = i[1] == account
-            items += self.memory.get(*args)
+            items += mem.get(*args)
     return memories.ReportStruct("outstanding", items, mem)
 
 
@@ -45,14 +44,14 @@ def add_reports(cls):
         def do_get_outstanding(self):
             """Get list of oustanding deals."""
             self.data = self.data[0] if self.data else self.data
-            r_struct = get_report_struct(self.data)
+            r_struct = get_report_struct(self.data, self.memory)
             self.attachment = handlers.ExcelGenerator(r_struct).binary()
             self.attachment_filename = "outstanding.xlsx"
 
         def do_get_outstanding_items(self):
             """Get list of outstanding items in text format."""
             self.data = self.data[0] if self.data else self.data
-            r_struct = get_report_struct(self.data)
+            r_struct = get_report_struct(self.data, self.memory)
             self.status = ";".join(r_struct.attrs)
             self.status += "\n"
             for item in r_struct.items:
