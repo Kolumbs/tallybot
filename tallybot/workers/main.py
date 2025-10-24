@@ -43,5 +43,7 @@ tallybot = Agent(
         master.get_user_last_attachments,
         master.do_register_partner,
         financials.send_discrepancy_report,
+        financials.list_discrepancies,
+        financials.recalculate_partner_discrepancies,
     ],
 )

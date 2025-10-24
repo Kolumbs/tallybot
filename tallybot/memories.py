@@ -502,7 +502,6 @@ class ReportStruct:
     items: list
     memory: data.InitVar[membank.LoadMemory]
     report_args: dict = data.field(default_factory=dict)
-    callbacks: dict = data.field(default_factory=dict)
     attrs: list = data.field(default_factory=list)
     start: int = 1
     header: list = data.field(default_factory=list)
@@ -514,15 +513,15 @@ class ReportStruct:
         if not self.attrs:
             self.attrs = report_table[self.title]
         if self.title in ["ledger", "outstanding"]:
-            self.callbacks = {
-                "date": lambda x: x.strftime("%Y-%m-%d"),
-                "partner": lambda x: memory.get.partner(id=x).name if x else "",
-            }
+            self.sanitise_item_fields(
+                date=lambda x: x.strftime("%Y-%m-%d"),
+                partner=lambda x: memory.get.partner(id=x).name if x else "",
+            )
         if self.title == "tripsummary":
-            self.callbacks = {
-                "receipt_litres": lambda x: x if x else "",
-                "date": lambda x: x.strftime("%Y-%m-%d"),
-            }
+            self.sanitise_item_fields(
+                receipt_litres=lambda x: x if x else "",
+                date=lambda x: x.strftime("%Y-%m-%d"),
+            )
             self.start = 10
             end = len(self.items)
             today = datetime.date.today().strftime("%Y-%m-%d")
@@ -538,6 +537,13 @@ class ReportStruct:
                 self.header.append(
                     ("A7", f"Tahometer: {self.report_args['tahometer']}")
                 )
+
+    def sanitise_item_fields(self, **kargs):
+        """Sanitise item fields according to given functions."""
+        for item in self.items:
+            for field, func in kargs.items():
+                if field in item:
+                    item[field] = func(item[field])
 
 
 @dataclass

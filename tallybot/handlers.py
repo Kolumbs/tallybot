@@ -54,13 +54,6 @@ class ExcelGenerator:
             for a, item in enumerate(r_struct.items):
                 for i, j in enumerate(r_struct.attrs):
                     val = getattr(item, j)
-                    if j in r_struct.callbacks:
-                        try:
-                            val = r_struct.callbacks[j](val)
-                        except AttributeError:
-                            raise RuntimeWarning(
-                                f"Transaction {item} misses partner"
-                            ) from None
                     rows.append(
                         (
                             f"{string.ascii_uppercase[i]}{str(start + a + 1)}",
