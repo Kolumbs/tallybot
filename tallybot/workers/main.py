@@ -45,5 +45,8 @@ tallybot = Agent(
         financials.send_discrepancy_report,
         financials.list_discrepancies,
         financials.recalculate_partner_discrepancies,
+        financials.update_transaction,
+        financials.list_transactions,
+        financials.send_ledger_report,
     ],
 )

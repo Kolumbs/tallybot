@@ -265,3 +265,15 @@ def get_file(full_path):
         raise RuntimeWarning(f"File does not exist in {full_path}")
     with open(full_path, mode="rb") as fname:
         return fname.read()
+
+
+def get_csv_text(r_struct):
+    """Return csv text from report structure."""
+    csv_text = ";".join(r_struct.attrs) + "\n"
+    for item in r_struct.items:
+        row = []
+        for attr in r_struct.attrs:
+            val = getattr(item, attr)
+            row.append(str(val))
+        csv_text += ";".join(row) + "\n"
+    return csv_text

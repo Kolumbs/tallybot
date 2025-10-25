@@ -15,7 +15,7 @@ from tallybot.lookups import get_mydata, get_partner
 
 from . import frontal_lobe
 from .reports import add_reports
-from .ledger import add_ledger
+from .ledger import add_ledger, update_transaction
 from .invoicing import add_invoicing
 
 
@@ -113,19 +113,11 @@ class Perform(frontal_lobe.Functions):
                 headers = [i.value.lower() for i in row]
                 continue
             book = dict(zip(headers, [i.value for i in row]))
-            update = self.memory.get.transaction(id=book.pop("id"))
-            for attr, value in book.items():
-                if attr == "date":
-                    value = datetime.date.fromisoformat(value)
-                elif attr == "partner":
-                    partner = self.memory.get.partner(name=value)
-                    if not partner:
-                        self.status += (
-                            f"Fail {update.id} as partner {value} not found\n"
-                        )
-                    value = partner.id
-                setattr(update, attr, value)
-            self.memory.put(update)
+            try:
+                update_transaction(book, self.memory)
+            except ValueError as error:
+                self.status += f"Fail {book.get('id')} : {error}\n"
+                continue
         self.status += "Done"
 
     def do_private_income(self):

@@ -52,14 +52,6 @@ def add_reports(cls):
             """Get list of outstanding items in text format."""
             self.data = self.data[0] if self.data else self.data
             r_struct = get_report_struct(self.data, self.memory)
-            self.status = ";".join(r_struct.attrs)
-            self.status += "\n"
-            for item in r_struct.items:
-                row = []
-                for attr in r_struct.attrs:
-                    val = getattr(item, attr)
-                    row.append(str(val))
-                self.status += ";".join(row)
-                self.status += "\n"
+            self.status = handlers.get_csv_text(r_struct)
 
     return ReportFunctions
