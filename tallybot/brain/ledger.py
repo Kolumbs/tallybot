@@ -149,8 +149,8 @@ def add_ledger(cls):
             if data.get("partner"):
                 filters["partner"] = get_partner(self.memory, data["partner"])
             today = datetime.date.today()
-            year = data["year"] if data.get("year") else today.year
-            month = data.get("month")
+            year = int(data["year"]) if data.get("year") else today.year
+            month = int(data["month"]) if data.get("month") else None
             earliest_date = datetime.date(year=year, month=month or 1, day=1)
             latest_date = datetime.date(
                 year=year if month and month < 12 else year + 1,

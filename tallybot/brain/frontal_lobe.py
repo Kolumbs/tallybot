@@ -33,8 +33,8 @@ class Functions():
         """Run a job by name."""
         self.data = payload
         self.binary = attachment
-        getattr(self, job_name)()
         self.status = "Done"
+        getattr(self, job_name)()
         return (self.status, self.attachment, self.attachment_filename)
 
     def prepare_trip_report(self, date, tahometer=False):

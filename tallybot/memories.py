@@ -542,8 +542,7 @@ class ReportStruct:
         """Sanitise item fields according to given functions."""
         for item in self.items:
             for field, func in kargs.items():
-                if field in item:
-                    item[field] = func(item[field])
+                setattr(item, field, func(getattr(item, field)))
 
 
 @dataclass
