@@ -1,6 +1,6 @@
 """Single booking operations functions."""
 
-from datetime import date
+import datetime
 
 import pydantic
 from agents import RunContextWrapper, function_tool
@@ -12,7 +12,7 @@ from .base import TallybotContext
 class PrivateTransaction(pydantic.BaseModel):
     """Required data to register private bookings."""
 
-    date: date = pydantic.Field(
+    date: datetime.date = pydantic.Field(
         description="Date of the transaction in YYYY-MM-DD format"
     )
     amount: float = pydantic.Field(description="Value of the booking")
