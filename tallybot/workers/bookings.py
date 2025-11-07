@@ -39,7 +39,13 @@ async def do_private_expense_booking(
         w.context.conf,
         w.context.memory,
         "do_private_expense",
-        [{"value": data.amount, "date": data.date, "partner": data.partner}],
+        [
+            {
+                "value": data.amount,
+                "date": data.date.isoformat(),
+                "partner": data.partner,
+            }
+        ],
     )
     return msg
 
@@ -54,14 +60,20 @@ async def do_private_income_booking(
     These are single bookings that do not require proof documents and
     are outside scope of the accounting.
 
-    Private income bookings are done to remove outstanding items that
-    do not relate to business activities. Outstanding items are bookings
+    Private income bookings are done to remove outstanding items that do
+    not relate to business activities. Outstanding items are bookings
     from discrepancy report.
     """
     msg, _, _ = do_task(
         w.context.conf,
         w.context.memory,
         "do_private_income",
-        [{"value": data.amount, "date": data.date, "partner": data.partner}],
+        [
+            {
+                "value": data.amount,
+                "date": data.date.isoformat(),
+                "partner": data.partner,
+            }
+        ],
     )
     return msg
