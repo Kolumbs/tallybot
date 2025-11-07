@@ -286,6 +286,14 @@ async def recalculate_partner_discrepancies(
     msg, _, _ = do_task(
         w.context.conf,
         w.context.memory,
+        "do_recalculate_outstanding",
+        [{"year": year, "partner": partner}],
+    )
+    if not msg.startswith("Done"):
+        return msg
+    msg, _, _ = do_task(
+        w.context.conf,
+        w.context.memory,
         "do_get_outstanding_items",
         [{"year": year, "partner": partner}],
     )
