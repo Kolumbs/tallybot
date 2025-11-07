@@ -38,7 +38,7 @@ async def send_ledger_report(
         w.context.conf,
         w.context.memory,
         "do_get_ledger",
-        [{"year": year}],
+        [payload],
     )
     if fbytes:
         w.context.message_parts.append(

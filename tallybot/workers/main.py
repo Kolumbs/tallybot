@@ -3,7 +3,7 @@
 import pydantic
 from agents import Agent
 
-from . import invoicing, master, financials
+from . import invoicing, master, financials, bookings
 
 
 TALLYBOT = (
@@ -48,5 +48,7 @@ tallybot = Agent(
         financials.update_transaction,
         financials.list_transactions,
         financials.send_ledger_report,
+        bookings.do_private_expense_booking,
+        bookings.do_private_income_booking,
     ],
 )
