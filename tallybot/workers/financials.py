@@ -206,7 +206,7 @@ async def create_transaction(
         "reference": reference,
         "source": source,
         "comment": comment,
-        "amount": amount,
+        "debit_amount": amount,
         "debit": debit,
         "credit": credit,
     }
