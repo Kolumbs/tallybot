@@ -210,7 +210,7 @@ async def create_transaction(
         "debit": debit,
         "credit": credit,
     }
-    if partner is None:
+    if partner is not None:
         payload["partner"] = partner
     msg, _, _ = do_task(
         w.context.conf,
