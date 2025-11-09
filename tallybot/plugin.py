@@ -11,12 +11,33 @@ from agents import (
     RunConfig,
     TResponseInputItem,
 )
-from zoozl.chatbot import Interface, Package, InterfaceRoot, Message, MessagePart
+from zoozl.chatbot import (
+    Interface,
+    Package,
+    InterfaceRoot,
+    Message,
+    MessagePart,
+)
 
 from . import workers
 import logging
 
 log = logging.getLogger(__name__)
+
+
+class TallybotSession(SQLiteSession):
+    """Tallybot session that limits message history."""
+
+    window_size = 10
+
+    def __init__(self, session_id, db_path):
+        super().__init__(session_id=session_id, db_path=db_path)
+
+    async def get_items(self, limit: int | None = None):
+        """Override to only return the last N messages."""
+        if limit is None:
+            limit = self.window_size
+        return await super().get_items(limit=limit)
 
 
 class TallyBot(Interface):
@@ -69,7 +90,7 @@ class TallyBot(Interface):
                 },
             ],
             run_config=RunConfig(session_input_callback=input_callable),
-            session=SQLiteSession(package.talker, self.db_path),
+            session=TallybotSession(package.talker, self.db_path),
             context=context.context,
         )
         msg = Message(author="agent")
