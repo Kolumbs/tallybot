@@ -40,7 +40,7 @@ tallybot = Agent(
             tool_name="bank_statement_clerk",
             tool_description="You can book bank statements with this tool.",
         ),
-        master.get_user_last_attachments,
+        master.get_user_last_attachment,
         master.do_register_partner,
         financials.send_discrepancy_report,
         financials.list_discrepancies,

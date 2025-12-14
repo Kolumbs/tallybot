@@ -1,7 +1,9 @@
 """Workers that work with master data management."""
 
+import base64
 import pydantic
 from agents import function_tool, RunContextWrapper
+from agents.tool import ToolOutputFileContent, ToolOutputText
 from .base import TallybotContext
 from ..brain import do_task
 
@@ -35,16 +37,22 @@ async def do_register_partner(
 
 
 @function_tool
-async def get_user_last_attachments(
+async def get_user_last_attachment(
     w: RunContextWrapper[TallybotContext],
-) -> str:
-    """Return a list of filenames attached to the last message."""
-    return [
-        {
-            "file_type": i.media_type,
-            "size": len(i.binary),
-            "file_name": i.filename,
-        }
-        for i in w.context.package.last_message.parts
-        if i.binary
-    ]
+) -> ToolOutputFileContent | ToolOutputText:
+    """Return last user attached file."""
+    files = [i for i in w.context.package.last_message.parts if i.binary]
+    if not files:
+        return None
+    last_file = files[-1]
+    if last_file.media_type in ["text/plain", "text/csv", "application/json"]:
+        return ToolOutputText(text=last_file.binary.decode("utf-8"))
+    return ToolOutputFileContent(
+        file_data=image_as_base64(last_file.binary),
+        file_name=last_file.filename,
+    )
+
+
+def image_as_base64(image: bytes):
+    """Return image as base64 string."""
+    return base64.b64encode(image).decode("utf-8")

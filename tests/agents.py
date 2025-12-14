@@ -6,6 +6,7 @@ use mocking to extent possible.
 """
 
 from . import base as bs
+from .data.pdfbinaries import BLANK_PAGE_PDF
 
 
 class DoInvoice(bs.AgentTestCase):
@@ -25,11 +26,11 @@ class DoInvoice(bs.AgentTestCase):
             "Reference: INV-1001\n"
             "Comment: Office supplies\n"
             "Partner: OfficeMart\n"
-            "Value: 100\n"
+            "Value: 110\n"
             "Expense account: 7120\n"
             "Currency: USD\n"
             "Split: 100",
-            fbytes=b"pdf-09293"
+            fbytes=BLANK_PAGE_PDF,
         )
         booking = self.memory.get.transaction(date="2023-10-10")
         self.assertIsNotNone(booking, self.callback.call_args)

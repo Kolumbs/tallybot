@@ -61,21 +61,12 @@ class TallyBot(Interface):
 
     async def consume(self, package: Package):
         """Handle incoming message."""
-        attachments = [
-            workers.FileContext(
-                binary=i.binary,
-                media_type=i.media_type,
-                filename=i.filename,
-            )
-            for i in package.last_message.parts
-            if i.binary
-        ]
+        attachments = len(package.get_attachments(5, False))
         context = RunContextWrapper(
             workers.TallybotContext(
                 conf=self.conf["tallybot"],
                 memory=self.memory,
                 package=package,
-                attachments=attachments,
                 message_parts=[],
             )
         )
@@ -86,7 +77,7 @@ class TallyBot(Interface):
                 {
                     "role": "system",
                     "content": f"Time: {datetime.datetime.now().isoformat()}\n"
-                    f"Attachments:{len(attachments)}.",
+                    f"Attachments:{attachments}.",
                 },
             ],
             run_config=RunConfig(session_input_callback=input_callable),

@@ -37,6 +37,7 @@ class TestCase(unittest.IsolatedAsyncioTestCase):
     def setUpClass(cls):
         """Setup testcase with configuration."""
         cls.config = cls.load_configuration(cls.config_file)
+        cls.callback = MagicMock()
 
     @staticmethod
     def load_configuration(config_file):
@@ -45,6 +46,30 @@ class TestCase(unittest.IsolatedAsyncioTestCase):
             c = tomllib.load(f)
             c["extensions"] = ["tallybot.plugin"]
             return MappingProxyType(c)
+
+    def create_package(
+        self,
+        message: str = "",
+        talker: str | None = None,
+        attachments: list[bytes, str, str] | None = None,
+    ):
+        """Generate a package."""
+        if talker is None:
+            talker = (
+                "random_talker_" + str(uuid.uuid1()).split("-", maxsplit=1)[0]
+            )
+        package = Package(api.Conversation(talker=talker), self.callback)
+        msg = api.Message(message)
+        if attachments is not None:
+            for fbytes, fname, ftype in attachments:
+                part = api.MessagePart(
+                    binary=fbytes,
+                    media_type=ftype,
+                    filename=fname,
+                )
+                msg.parts.append(part)
+        package.conversation.messages.append(msg)
+        return package
 
 
 def unique_name(self=None):
@@ -340,7 +365,6 @@ class AgentTestCase(TestCase):
     def setUp(self):
         """Load required methods for agent do_task calls."""
         self.maxDiff = None
-        self.callback = MagicMock()
 
     async def asyncSetUp(self):
         """Async setup."""
@@ -353,16 +377,10 @@ class AgentTestCase(TestCase):
         self.root = InterfaceRoot(self.config)
         self.root.memory = self.memory
         self.agent.load(self.root)
-        package = Package(api.Conversation(talker="test_talker"), self.callback)
-        msg = api.Message(message)
+        attachment = tuple()
         if fbytes is not None:
-            part = api.MessagePart(
-                binary=fbytes,
-                media_type=ftype,
-                filename=fname,
-            )
-            msg.parts.append(part)
-        package.conversation.messages.append(msg)
+            attachment = ((fbytes, fname, ftype),)
+        package = self.create_package(message, "test_talker", attachment)
         await self.agent.consume(package)
         return package.last_message.text
 

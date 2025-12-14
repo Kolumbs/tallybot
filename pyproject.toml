@@ -21,9 +21,9 @@ requires-python = ">=3.11.1"
 dependencies = [
     "openpyxl==3.1.5",
     "pdftotext==2.2.2",
-    "zoozl>=0.2.4,<1.0",
+    "zoozl>=0.2.7,<1.0",
     "reportlab==4.2.5",
-    "openai-agents==0.3.0",
+    "openai-agents==0.6.2",
     "requests>=2.31.0",
     "numpy>=1.26,<2.0",
 ]

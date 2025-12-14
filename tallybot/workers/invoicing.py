@@ -1,16 +1,14 @@
 """Agent for invoice booking."""
 
-from dataclasses import dataclass
-from agents import Agent, function_tool, RunContextWrapper
 import logging
+from dataclasses import dataclass
+from typing import Optional
 
 import pydantic
+from agents import Agent, RunContextWrapper, function_tool
 
-from ..brain import do_task, Perform
-from .. import handlers
-from . import master
-from .base import TallybotContext, FileContext, catch_exceptions
-
+from ..brain import do_task
+from . import base, master
 
 log = logging.getLogger(__name__)
 
@@ -23,12 +21,14 @@ class InvoiceData(pydantic.BaseModel):
     comment: str = pydantic.Field(description="Comment for the invoice")
     partner: str = pydantic.Field(description="Partner name")
     value: float = pydantic.Field(description="Invoice amount")
-    expense_account: str = pydantic.Field(
-        description="Expense account code, e.g., 7120"
+    expense_account: Optional[str] = pydantic.Field(
+        default=None, description="Expense account code, e.g., 7120"
     )
-    currency: str = pydantic.Field(description="Currency code, e.g., EUR")
-    split: float = pydantic.Field(
-        description="Split percentage, e.g., 100 for full amount"
+    currency: Optional[str] = pydantic.Field(
+        default=None, description="Currency code, e.g., EUR"
+    )
+    split: Optional[float] = pydantic.Field(
+        default=None, description="Split percentage, e.g., 100 for full amount"
     )
 
 
@@ -42,20 +42,17 @@ class JobResult:
 
 
 @function_tool
+@base.assert_single_attachment("application/pdf", "image/png", "image/jpeg")
 async def do_book_invoice(
-    w: RunContextWrapper[TallybotContext], invoice_data: InvoiceData
+    w: RunContextWrapper[base.TallybotContext], invoice_data: InvoiceData
 ) -> str:
     """Book invoice in accounting system."""
-    if len(w.context.attachments) > 1:
-        return "Too many attachments, please attach only one invoice file."
-    if len(w.context.attachments) == 0:
-        return "No attachment found, please attach the invoice file."
     msg, fbytes, fname = do_task(
         w.context.conf,
         w.context.memory,
         "do_add_expense",
-        [invoice_data.model_dump()],
-        w.context.attachments[0].binary,
+        [invoice_data.model_dump(exclude_unset=True)],
+        w.context.get_attachment().binary,
     )
     return msg
 
@@ -73,84 +70,26 @@ accounts_payable_clerk = Agent(
     ),
     tools=[
         do_book_invoice,
-        master.get_user_last_attachments,
+        master.get_user_last_attachment,
     ],
 )
 
 
 @function_tool
+@base.catch_exceptions
+@base.assert_single_attachment("text/csv")
 async def do_seb_statement_import(
-    w: RunContextWrapper[TallybotContext],
+    w: RunContextWrapper[base.TallybotContext],
 ) -> str:
     """Import SEB bank statement into accounting system."""
-    if len(w.context.attachments) > 1:
-        return (
-            "Too many attachments, please attach only one bank statement file."
-        )
-    if len(w.context.attachments) == 0:
-        return "No attachment found, please attach the bank statement file."
-    if w.context.attachments[0].media_type != "text/csv":
-        return "Unsupported file type, please attach a csv file format."
     msg, fbytes, fname = do_task(
         w.context.conf,
         w.context.memory,
         "do_seb_statement",
         [],
-        w.context.attachments[0].binary,
+        w.context.get_attachment().binary,
     )
     return msg
-
-
-@function_tool
-@catch_exceptions
-async def save_bank_statement(w: RunContextWrapper[TallybotContext]) -> str:
-    """Save bank statement on desktop."""
-    if len(w.context.attachments) > 1:
-        return (
-            "Too many attachments, please attach only one bank statement file."
-        )
-    if len(w.context.attachments) == 0:
-        return "No attachment found, please attach the bank statement file."
-    with Perform(
-        w.context.conf,
-        w.context.memory,
-    ) as job:
-        handlers.save_file(
-            job.generate_path("desktop", "csv", "seb_statement"),
-            w.context.attachments[0].binary,
-            overwrite=True,
-        )
-    w.context.attachments = [FileContext(
-        binary=w.context.attachments[0].binary,
-        media_type="text/csv",
-        filename="seb_statement.csv",
-    )]
-    return "Bank statement `seb_statement.csv` saved."
-
-
-@function_tool
-@catch_exceptions
-async def retrieve_bank_statement(
-    w: RunContextWrapper[TallybotContext],
-) -> str:
-    """Retrieve bank statement from desktop."""
-    if len(w.context.attachments) > 0:
-        return "There is already attachment attached. Cannot overwrite"
-    with Perform(
-        w.context.conf,
-        w.context.memory,
-    ) as job:
-        w.context.attachments = [
-            FileContext(
-                binary=handlers.get_file(
-                    job.generate_path(
-                        "uploaded_documents", "csv", "seb_statement"
-                    )
-                ),
-                media_type="text/csv",
-                filename="seb_statement.csv",
-            )
-        ]
 
 
 bank_statement_clerk = Agent(
@@ -162,9 +101,6 @@ bank_statement_clerk = Agent(
         "Process bank statement through the accounting system."
     ),
     tools=[
-        save_bank_statement,
-        retrieve_bank_statement,
         do_seb_statement_import,
-        master.get_user_last_attachments,
     ],
 )
