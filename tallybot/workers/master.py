@@ -43,13 +43,13 @@ async def get_user_last_attachment(
     """Return last user attached file."""
     files = [i for i in w.context.package.last_message.parts if i.binary]
     if not files:
-        return None
-    last_file = files[-1]
-    if last_file.media_type in ["text/plain", "text/csv", "application/json"]:
-        return ToolOutputText(text=last_file.binary.decode("utf-8"))
+        return ToolOutputText(text="No attached files found.")
+    lastf = files[-1]
+    if lastf.media_type in ["text/plain", "text/csv", "application/json"]:
+        return ToolOutputText(text=lastf.binary.decode("utf-8"))
     return ToolOutputFileContent(
-        file_data=image_as_base64(last_file.binary),
-        file_name=last_file.filename,
+        file_data=f"data:{lastf.media_type};base64,{image_as_base64(lastf.binary)}",
+        file_name=lastf.filename,
     )
 
 
