@@ -33,6 +33,8 @@ if __name__ == "__main__":
         "extensions": ["tallybot.plugin"],
         "tallybot": config["tallybot"],
     }
+    if "log_level" in config["tallybot"]:
+        zoozl_cfg["log_level"] = config["tallybot"]["log_level"]
     if "slack" in config:
         if "port" in config["slack"]:
             zoozl_cfg["slack_port"] = config["slack"]["port"]
