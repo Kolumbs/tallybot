@@ -8,7 +8,7 @@ import pydantic
 from agents import Agent, RunContextWrapper, function_tool
 
 from ..brain import do_task
-from . import base, master
+from . import base, master, bookings
 
 log = logging.getLogger(__name__)
 
@@ -61,16 +61,15 @@ accounts_payable_clerk = Agent(
     name="accounts_payable_clerk",
     instructions=(
         "You are Invoice Processing / AP Clerk"
-        "Main focus: Booking invoices into the accounting system."
+        "Main focus: Booking supplier invoices into the accounting system."
         "Receive and verify invoices have required data for booking."
         "Enter invoices accurately into accounting system using provided tools."
-        "Ensure coding to correct accounts."
-        "Flag discrepancies for resolution."
-        "Maintain the digital invoice filing system."
     ),
     tools=[
         do_book_invoice,
         master.get_user_last_attachment,
+        bookings.do_private_expense_booking,
+        bookings.do_private_income_booking,
     ],
 )
 

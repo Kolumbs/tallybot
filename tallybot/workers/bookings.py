@@ -26,7 +26,7 @@ async def do_private_expense_booking(
     w: RunContextWrapper[TallybotContext],
     data: PrivateTransaction,
 ) -> str:
-    """Book a private expense.
+    """Book a non business related expense.
 
     These are single bookings that do not require proof documents and
     are outside scope of the accounting.
@@ -55,7 +55,7 @@ async def do_private_income_booking(
     w: RunContextWrapper[TallybotContext],
     data: PrivateTransaction,
 ) -> str:
-    """Book a private income.
+    """Book a non business related private income.
 
     These are single bookings that do not require proof documents and
     are outside scope of the accounting.
