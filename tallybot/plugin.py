@@ -1,7 +1,6 @@
 """Tallybot plugin to zoozl server."""
 
 import datetime
-import json
 
 from agents import (
     set_default_openai_key,

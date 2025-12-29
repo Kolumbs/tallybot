@@ -384,6 +384,11 @@ class AgentTestCase(TestCase):
         await self.agent.consume(package)
         return package.last_message.text
 
+    def get_agent_response(self):
+        """Return last agent response."""
+        self.callback.assert_called()
+        return self.callback.call_args[0][0].text
+
 
 class BrainTestCase(TestCase):
     """Abstract testcase for brain interface."""

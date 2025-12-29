@@ -47,9 +47,14 @@ async def get_user_last_attachment(
     lastf = files[-1]
     if lastf.media_type in ["text/plain", "text/csv", "application/json"]:
         return ToolOutputText(text=lastf.binary.decode("utf-8"))
+    if not lastf.filename:
+        return ToolOutputText(text="Last attached file has no filename.")
+    if lastf.media_type not in ["application/pdf"]:
+        return ToolOutputText(text="Currently only pdf files are supported.")
     return ToolOutputFileContent(
         file_data=f"data:{lastf.media_type};base64,{image_as_base64(lastf.binary)}",
-        file_name=lastf.filename,
+        filename=lastf.filename,
+        code="base64",
     )
 
 

@@ -6,7 +6,7 @@ use mocking to extent possible.
 """
 
 from . import base as bs
-from .data.pdfbinaries import BLANK_PAGE_PDF
+from .data.pdfbinaries import BLANK_PAGE_PDF, HELLO_PDF
 
 
 class DoInvoice(bs.AgentTestCase):
@@ -34,6 +34,30 @@ class DoInvoice(bs.AgentTestCase):
         )
         booking = self.memory.get.transaction(date="2023-10-10")
         self.assertIsNotNone(booking, self.callback.call_args)
+
+
+class FileRead(bs.AgentTestCase):
+    """Test conversation to read a file."""
+
+    async def test_plain(self):
+        """Verify reading correctly a file."""
+        await self.ask(
+            "Read the attached file and summarize its content.",
+            fbytes=b"This is a sample text file for testing.",
+            fname="rubikon.txt",
+            ftype="text/plain",
+        )
+        self.assertIn("test", self.get_agent_response().lower())
+
+    async def test_pdf(self):
+        """Verify reading correctly a PDF file."""
+        await self.ask(
+            "Read the attached file and summarize its content.",
+            fbytes=HELLO_PDF,
+            fname="rubikon.pdf",
+            ftype="application/pdf",
+        )
+        self.assertIn("mars", self.get_agent_response().lower())
 
 
 class DoStatement(bs.AgentTestCase):
