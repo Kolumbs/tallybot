@@ -41,10 +41,9 @@ async def get_user_last_attachment(
     w: RunContextWrapper[TallybotContext],
 ) -> ToolOutputFileContent | ToolOutputText:
     """Return last user attached file."""
-    files = [i for i in w.context.package.last_message.parts if i.binary]
-    if not files:
+    lastf = w.context.get_attachment()
+    if lastf is None:
         return ToolOutputText(text="No attached files found.")
-    lastf = files[-1]
     if lastf.media_type in ["text/plain", "text/csv", "application/json"]:
         return ToolOutputText(text=lastf.binary.decode("utf-8"))
     if not lastf.filename:

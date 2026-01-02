@@ -2,7 +2,7 @@
 
 from agents import Agent
 
-from . import invoicing, master, financials
+from . import payables, banking, master, financials, journal
 
 
 TALLYBOT = (
@@ -20,11 +20,11 @@ tallybot = Agent(
     name="Tallybot",
     instructions=TALLYBOT,
     tools=[
-        invoicing.accounts_payable_clerk.as_tool(
+        payables.accounts_payable_clerk.as_tool(
             tool_name="accounts_payable_clerk",
             tool_description="Delegate any work for booking supplier invoices.",
         ),
-        invoicing.bank_statement_clerk.as_tool(
+        banking.bank_statement_clerk.as_tool(
             tool_name="bank_statement_clerk",
             tool_description="You can book bank statements with this tool.",
         ),
@@ -33,9 +33,11 @@ tallybot = Agent(
         financials.send_discrepancy_report,
         financials.list_discrepancies,
         financials.recalculate_partner_discrepancies,
-        financials.update_transaction,
-        financials.create_transaction,
         financials.list_transactions,
         financials.send_ledger_report,
+        journal.ledger_correction_clerk.as_tool(
+            tool_name="ledger_correction_clerk",
+            tool_description="You can correct ledger entries with this tool.",
+        ),
     ],
 )
