@@ -36,7 +36,12 @@ class TallybotSession(SQLiteSession):
         """Override to only return the last N messages."""
         if limit is None:
             limit = self.window_size
-        return await super().get_items(limit=limit)
+        items = await super().get_items(limit=limit)
+        while limit is not None and items:
+            if items[0].get("role") == "user":
+                break
+            items.pop(0)
+        return items
 
 
 class TallyBot(Interface):

@@ -25,7 +25,7 @@ __all__ = ["add_memory", "AgentTestCase", "BrainTestCase", "TestCase"]
 
 
 TEMP_STORAGE_PATH = "tests/tmp/"
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.ERROR)
 
 
 class TestCase(unittest.IsolatedAsyncioTestCase):
