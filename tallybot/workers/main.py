@@ -11,8 +11,7 @@ TALLYBOT = (
     "Tasks can be executed by other agents."
     "If there is no agent that can execute particular task,"
     "apologise that you can't complete it and wait for other tasks."
-    "Immediately when you know which task to handle execute it."
-    "Prioritise delegation, speed and brevity"
+    "Be careful in task execution, confirm the details with the user first"
 )
 
 
