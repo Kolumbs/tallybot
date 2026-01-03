@@ -29,6 +29,7 @@ tallybot = Agent(
             tool_description="You can book bank statements with this tool.",
         ),
         master.do_register_partner,
+        master.do_update_partner,
         master.get_user_last_attachment,
         financials.send_discrepancy_report,
         financials.list_discrepancies,
