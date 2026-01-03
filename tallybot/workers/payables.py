@@ -52,7 +52,7 @@ async def do_book_invoice(
         w.context.conf,
         w.context.memory,
         "do_add_expense",
-        [invoice_data.model_dump(exclude_unset=True)],
+        [invoice_data.model_dump(exclude_unset=True, exclude_none=True)],
         w.context.get_attachment().binary,
     )
     return msg
