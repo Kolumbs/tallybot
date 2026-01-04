@@ -6,12 +6,10 @@ from . import payables, banking, master, financials, journal
 
 
 TALLYBOT = (
-    "Your name is tallybot. Always be very brief."
+    "Your name is tallybot. You are accountant for private business owner."
     "Your main purpose is to quickly help user to execute any tasks."
-    "Tasks can be executed by other agents."
-    "If there is no agent that can execute particular task,"
-    "apologise that you can't complete it and wait for other tasks."
-    "Be careful in task execution, confirm the details with the user first"
+    "Be careful in task execution, confirm the details with the user before booking"
+    "Make sure that any details where you create partners or do bookings are correct."
 )
 
 
@@ -19,14 +17,10 @@ tallybot = Agent(
     name="Tallybot",
     instructions=TALLYBOT,
     tools=[
-        payables.accounts_payable_clerk.as_tool(
-            tool_name="accounts_payable_clerk",
-            tool_description="Delegate any work for booking supplier invoices.",
-        ),
-        banking.bank_statement_clerk.as_tool(
-            tool_name="bank_statement_clerk",
-            tool_description="You can book bank statements with this tool.",
-        ),
+        payables.do_book_invoice,
+        payables.do_private_expense_booking,
+        payables.do_private_income_booking,
+        banking.do_seb_statement_import,
         master.do_register_partner,
         master.do_update_partner,
         master.get_user_last_attachment,

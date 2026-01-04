@@ -137,6 +137,8 @@ accounts_payable_clerk = Agent(
         "Enter invoices accurately into accounting system using provided tools."
         "Only if user confirms or requests explicitly, book a non business related"
         " private expense or income to clear outstanding items."
+        "When booking expenses, there is an option to provide split parameter, the "
+        "parameter is a percentage of how much of the invoice amount is business related."
     ),
     tools=[
         do_book_invoice,
