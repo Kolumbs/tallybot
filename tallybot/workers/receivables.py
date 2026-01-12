@@ -12,7 +12,7 @@ async def do_book_sales_invoice(
     w: RunContextWrapper[base.TallybotContext],
 ) -> str:
     """Book sales invoice in accounting system."""
-    if not w.context.attachment:
+    if not w.context.get_attachment():
         return "No attachment found to book as sales invoice."
     msg, fbytes, fname = do_task(
         w.context.conf,
