@@ -2,7 +2,7 @@
 
 from agents import Agent
 
-from . import payables, banking, master, financials, journal
+from . import payables, banking, master, financials, journal, receivables
 
 
 TALLYBOT = (
@@ -10,6 +10,7 @@ TALLYBOT = (
     "Your main purpose is to quickly help user to execute any tasks."
     "Be careful in task execution, confirm the details with the user before booking"
     "Make sure that any details where you create partners or do bookings are correct."
+    "You mostly book expenses or also called supplier invoices."
 )
 
 
@@ -33,5 +34,6 @@ tallybot = Agent(
             tool_name="ledger_correction_clerk",
             tool_description="You can correct ledger entries with this tool.",
         ),
+        receivables.do_book_sales_invoice,
     ],
 )
